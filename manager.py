@@ -76,9 +76,9 @@ def _run_git_command(args: list[str]) -> tuple[str, str]:
     all_args: list[str] = ["git", "-C", LOCAL_REPO_PATH] + args
     result = subprocess.run(all_args, capture_output=True, text=True, check=True)
     logger.trace(' '.join(all_args))
-    logger.trace(result.stdout.strip())
+    logger.trace("-stdout: "+result.stdout.strip())
     if result.stderr:
-        logger.trace(result.stderr.strip())
+        logger.trace("#stderr: "+result.stderr.strip())
     assert result.returncode == 0
     return result.stdout.strip(), result.stderr.strip()
     

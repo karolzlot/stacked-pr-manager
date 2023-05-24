@@ -89,19 +89,25 @@ def git_checkout(branch: Branch) -> int:
             f"Switched to branch '{branch}'"]
     if stdout == f"Your branch is up to date with 'origin/{branch}'.":
         return 0
-    else:
-        pattern = rf'Your branch is behind \'origin/{branch}\' by (\d+) commits, and can be fast-forwarded.'
-        match = re.search(pattern, stdout)
-        if match:
-            num_commits = int(match.group(1))
-            return num_commits
-        else:
-            raise ValueError(f"Unexpected output from git checkout: {stdout}")
     
+    pattern = rf'Your branch is behind \'origin/{branch}\' by (\d+) commits, and can be fast-forwarded.'
+    match = re.search(pattern, stdout)
+    if match:
+        num_commits = int(match.group(1))
+        return -num_commits
+        
+    pattern = rf'Your branch is ahead of \'origin/{branch}\' by (\d+) commits.'
+    match = re.search(pattern, stdout)
+    if match:
+        num_commits = int(match.group(1))
+        return num_commits
+
+    raise ValueError(f"Unexpected output from git checkout: {stdout}")
+
 def git_pull(branch: Branch) -> bool:
     # TODO check if it is possible to pull without checkout
     git_checkout(branch)
-    # if git_checkout(branch) > 0:
+    # if git_checkout(branch) < 0:
     stdout, stderr = _run_git_command(["pull"])
     assert stderr == "" or "[new branch]" in stderr
     if stdout == f"Already up to date.":

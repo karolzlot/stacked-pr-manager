@@ -96,6 +96,17 @@ def _git_merge_base(branch1: Branch, branch2: Branch) -> Commit:
     return Commit(stdout)
 
 
+def _git_rev_parse(branch: Branch) -> Commit:
+    """Get current commit hash
+    https://stackoverflow.com/questions/15798862/what-does-git-rev-parse-do
+    """
+    stdout, stderr = _run_git_command(["rev-parse", branch])
+    assert stderr == ""
+    assert len(stdout) == 40
+    assert not " " in stdout
+    assert re.match(r"[0-9a-f]{40}", stdout)
+    return Commit(stdout)
+
 
 
 

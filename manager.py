@@ -3,7 +3,7 @@ import re
 import time
 import subprocess
 from pathlib import Path
-from typing import Union, NewType
+from typing import Union, NewType, TypedDict
 from ruamel.yaml import YAML
 from dotenv import load_dotenv
 from github import Github
@@ -11,30 +11,41 @@ from dirhash import dirhash
 from loguru import logger
 from time import sleep
 
-Branch = NewType('Branch', str)
-Commit = NewType('Commit', str)
-
 load_dotenv()
-
 
 GITHUB_ACCESS_TOKEN= os.getenv('GITHUB_ACCESS_TOKEN')
 LOCAL_REPO_PATH= os.getenv('LOCAL_REPO_PATH')
 GITHUB_REPO= os.getenv('GITHUB_REPO')
 assert GITHUB_ACCESS_TOKEN and LOCAL_REPO_PATH and GITHUB_REPO
 
-def read_prs_config_file() -> list[dict[str, Union[str,int]]]:
-    config_file = Path('prs.yaml')
-    if not config_file.exists():
-        raise FileNotFoundError('prs.yaml file not found.')
 
-    with open(config_file, 'r') as file:
+Branch = NewType('Branch', str)
+Commit = NewType('Commit', str)
+
+class PRData(TypedDict):
+    branch: Branch
+    title: str
+    pr_number: int
+    target: Branch
+
+
+def read_prs_config_file() -> list[PRData]:
+    file_path = Path('prs.yaml')
+    with open(file_path, 'r') as file:
         yaml = YAML(typ='safe')
-        config_data = yaml.load(file)
+        prs_data: list[dict] = yaml.load(file)
 
-    if not isinstance(config_data, list):
-        raise ValueError('Invalid format in prs.yaml file.')
+    pull_requests_list = []
+    for entry in prs_data:
+        pull_request = PRData(
+            branch=entry['branch'],
+            title=entry['title'],
+            pr_number=entry['pr_number'],
+            target=entry['target']
+        )
+        pull_requests_list.append(pull_request)
 
-    return config_data
+    return pull_requests_list
 
 
 def gh_get_pr_title(pr_number: int) -> str:

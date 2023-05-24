@@ -3,7 +3,7 @@ import re
 import time
 import subprocess
 from pathlib import Path
-from typing import Union
+from typing import Union, NewType
 from ruamel.yaml import YAML
 from dotenv import load_dotenv
 from github import Github
@@ -11,6 +11,8 @@ from dirhash import dirhash
 from loguru import logger
 from time import sleep
 
+Branch = NewType('Branch', str)
+Commit = NewType('Commit', str)
 
 load_dotenv()
 
@@ -52,7 +54,7 @@ def _run_git_command(args: list[str]) -> tuple[str, str]:
     assert result.returncode == 0
     return result.stdout.strip(), result.stderr.strip()
     
-def git_checkout(branch: str) -> int:
+def git_checkout(branch: Branch) -> int:
     assert not " " in branch
     stdout, stderr = _run_git_command(["checkout", branch])
     assert stderr in [f"Already on '{branch}'",
@@ -68,7 +70,7 @@ def git_checkout(branch: str) -> int:
         else:
             raise ValueError(f"Unexpected output from git checkout: {stdout}")
     
-def git_pull(branch: str) -> bool:
+def git_pull(branch: Branch) -> bool:
     # TODO check if it is possible to pull without checkout
     git_checkout(branch)
     # if git_checkout(branch) > 0:
@@ -82,7 +84,7 @@ def git_pull(branch: str) -> bool:
     else:
         raise ValueError(f"Unexpected output from git pull: {stdout}")
 
-def _git_merge_base(branch1: str, branch2: str) -> str:
+def _git_merge_base(branch1: Branch, branch2: Branch) -> Commit:
     """Find the most recent common ancestor of two branches
     https://stackoverflow.com/questions/1549146/git-find-the-most-recent-common-ancestor-of-two-branches
     """
@@ -90,7 +92,10 @@ def _git_merge_base(branch1: str, branch2: str) -> str:
     assert stderr == ""
     assert len(stdout) == 40
     assert not " " in stdout
-    return stdout
+    assert re.match(r"[0-9a-f]{40}", stdout)
+    return Commit(stdout)
+
+
 
 
 

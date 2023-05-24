@@ -108,6 +108,22 @@ def _git_rev_parse(branch: Branch) -> Commit:
     return Commit(stdout)
 
 
+def git_branch_merged( branch1: Branch, branch2: Branch) -> bool:
+    """Check if branch 1 is merged into branch 2 (so branch 2 = branch 1 + some commits)
+    To merge branch 1 into branch 2, we will need later `git merge branch1` when on branch 2
+    https://stackoverflow.com/questions/226976/how-can-i-know-if-a-branch-has-been-already-merged-into-master
+    """
+    merge_base = _git_merge_base(branch1, branch2)
+    rev1 = _git_rev_parse(branch1)
+    rev2 = _git_rev_parse(branch2)
+
+    assert rev2 != merge_base
+    assert rev2 != rev1
+    if rev1 != merge_base:
+        logger.info(f"Branch {branch1} is not merged into {branch2}")
+    return rev1 == merge_base
+
+
 
 
 

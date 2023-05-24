@@ -165,6 +165,19 @@ def git_merge_branch_into(branch1: Branch, branch2: Branch) -> bool:
     else:
         raise ValueError(f"Unexpected output from git merge: {stdout}")
 
+def sync_stacked_branches(prs: list[PRData] ) -> None:
+    """Sync stacked branches in the order they are given
+    """
+
+    for i in range(len(prs)-1, -1, -1):
+        pr = prs[i]
+        print(i)
+        if _git_branch_merged(prs[i]["target"], prs[i]["branch"]):
+            continue
+        else:
+            for j in range(i, len(prs)):
+                print(j)
+                git_merge_branch_into(prs[j]["target"], prs[j]["branch"])
 
 
 

@@ -179,7 +179,19 @@ def sync_stacked_branches(prs: list[PRData] ) -> None:
                 print(j)
                 git_merge_branch_into(prs[j]["target"], prs[j]["branch"])
 
+def dirhash_repo() -> str:
+    ignore = [".git/", ".venv/", "local/", "__pycache__/"]
 
+    # from dirhash import included_paths
+    # included_paths11 = included_paths( Path(LOCAL_REPO_PATH), ignore=ignore)
+    # # save to file:
+    # with open("included_paths.txt", "w") as f:
+    #     for path in included_paths11:
+    #         f.write(str(path) + "\n")
+
+    dir_hash = dirhash( Path(LOCAL_REPO_PATH), algorithm="sha1", ignore=ignore)
+    assert len(dir_hash) == 40
+    return dir_hash
 
 
 if __name__ == '__main__':

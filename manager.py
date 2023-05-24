@@ -82,6 +82,17 @@ def git_pull(branch: str) -> bool:
     else:
         raise ValueError(f"Unexpected output from git pull: {stdout}")
 
+def _git_merge_base(branch1: str, branch2: str) -> str:
+    """Find the most recent common ancestor of two branches
+    https://stackoverflow.com/questions/1549146/git-find-the-most-recent-common-ancestor-of-two-branches
+    """
+    stdout, stderr = _run_git_command(["merge-base", branch1, branch2])
+    assert stderr == ""
+    assert len(stdout) == 40
+    assert not " " in stdout
+    return stdout
+
+
 
 
 if __name__ == '__main__':

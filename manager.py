@@ -13,9 +13,9 @@ from time import sleep
 
 
 logger_format_stderr = (
-    "<green>{time:HH:mm:ss.SSS}</green> | "
-    "<level>{level: <8}</level> | "
-    "<level>{message}</level>"
+    "<green>{time:HH:mm:ss}</green> "
+    "<level>{level: <8}</level>| "
+    "{message}"
 )
 logger_format_file = (
     "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
@@ -75,7 +75,7 @@ def gh_get_pr_title(pr_number: int) -> str:
 def _run_git_command(args: list[str]) -> tuple[str, str]:
     all_args: list[str] = ["git", "-C", LOCAL_REPO_PATH] + args
     result = subprocess.run(all_args, capture_output=True, text=True, check=True)
-    logger.debug(' '.join(all_args))
+    logger.trace(' '.join(all_args))
     logger.trace(result.stdout.strip())
     if result.stderr:
         logger.trace(result.stderr.strip())
@@ -107,7 +107,7 @@ def git_pull(branch: Branch) -> bool:
     if stdout == f"Already up to date.":
         return False
     elif "Updating " in stdout:
-        logger.warning(stdout)
+        logger.info(stdout)
         return True
     else:
         raise ValueError(f"Unexpected output from git pull: {stdout}")
@@ -136,7 +136,7 @@ def _git_rev_parse(branch: Branch) -> Commit:
     return Commit(stdout)
 
 
-def git_branch_merged( branch1: Branch, branch2: Branch) -> bool:
+def _git_branch_merged( branch1: Branch, branch2: Branch) -> bool:
     """Check if branch 1 is merged into branch 2 (so branch 2 = branch 1 + some commits)
     To merge branch 1 into branch 2, we will need later `git merge branch1` when on branch 2
     https://stackoverflow.com/questions/226976/how-can-i-know-if-a-branch-has-been-already-merged-into-master
@@ -148,8 +148,22 @@ def git_branch_merged( branch1: Branch, branch2: Branch) -> bool:
     assert rev2 != merge_base
     assert rev2 != rev1
     if rev1 != merge_base:
-        logger.info(f"Branch {branch1} is not merged into {branch2}")
+        logger.debug(f"Branch {branch1} is not merged into {branch2}")
     return rev1 == merge_base
+
+def git_merge_branch_into(branch1: Branch, branch2: Branch) -> bool:
+    if _git_branch_merged(branch1, branch2):
+        return False
+    git_checkout(branch2)
+    stdout, stderr = _run_git_command(["merge", branch1])
+    assert stderr == ""
+    if stdout == f"Already up to date.":
+        return False
+    elif "Merge made by the 'ort' strategy." in stdout:
+        logger.info(f"Branch {branch1} merged into {branch2}") 
+        return True
+    else:
+        raise ValueError(f"Unexpected output from git merge: {stdout}")
 
 
 

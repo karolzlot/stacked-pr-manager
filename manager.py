@@ -11,6 +11,23 @@ from dirhash import dirhash
 from loguru import logger
 from time import sleep
 
+
+logger_format_stderr = (
+    "<green>{time:HH:mm:ss.SSS}</green> | "
+    "<level>{level: <8}</level> | "
+    "<level>{message}</level>"
+)
+logger_format_file = (
+    "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
+    "<level>{level: <8}</level> | "
+    "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | "
+    "<level>{message}</level>"
+)
+logger.remove()
+logger.add(sys.stderr, format=logger_format_stderr, level="DEBUG")
+logger.add("logs/file_{time}.log", format=logger_format_file, level="TRACE")
+
+
 load_dotenv()
 
 GITHUB_ACCESS_TOKEN= os.getenv('GITHUB_ACCESS_TOKEN')

@@ -1,0 +1,5 @@
+python-dotenv
+PyGithub
+dirhash
+ruamel.yaml
+loguru

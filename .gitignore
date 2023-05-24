@@ -1,0 +1,13 @@
+.venv/
+
+# Ignore everything
+*
+
+# But not these files
+!.gitignore
+!manager.py
+!todo.md
+!requirements.txt
+
+
+

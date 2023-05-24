@@ -114,9 +114,24 @@ def git_pull(branch: Branch) -> bool:
         return False
     elif "Updating " in stdout:
         logger.info(stdout)
+        assert git_checkout(branch) == 0
         return True
     else:
         raise ValueError(f"Unexpected output from git pull: {stdout}")
+
+def git_push(branch: Branch) -> bool:
+    # TODO check if it is possible to push without checkout
+    assert branch != "main"
+    git_checkout(branch)
+    # if git_checkout(branch) > 0:
+    stdout, stderr = _run_git_command(["push"])
+    assert stdout == ""
+    if stderr == f"Everything up-to-date":
+        return False
+    assert "remote: Resolving deltas:" in stderr
+    assert git_checkout(branch) == 0
+    return True
+
 
 def _git_merge_base(branch1: Branch, branch2: Branch) -> Commit:
     """Find the most recent common ancestor of two branches

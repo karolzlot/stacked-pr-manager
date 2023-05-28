@@ -83,7 +83,7 @@ def _run_git_command(args: list[str]) -> tuple[str, str]:
     return result.stdout.strip(), result.stderr.strip()
     
 def git_checkout(branch: Branch) -> int:
-    assert not " " in branch
+    assert branch.isidentifier()
     stdout, stderr = _run_git_command(["checkout", branch])
     assert stderr in [f"Already on '{branch}'",
             f"Switched to branch '{branch}'"]
@@ -106,6 +106,7 @@ def git_checkout(branch: Branch) -> int:
 
 def git_pull(branch: Branch) -> bool:
     # TODO check if it is possible to pull without checkout
+    assert branch.isidentifier()
     git_checkout(branch)
     # if git_checkout(branch) < 0:
     stdout, stderr = _run_git_command(["pull"])
@@ -121,6 +122,7 @@ def git_pull(branch: Branch) -> bool:
 
 def git_push(branch: Branch) -> bool:
     # TODO check if it is possible to push without checkout
+    assert branch.isidentifier()
     assert branch != "main"
     git_checkout(branch)
     # if git_checkout(branch) > 0:
@@ -137,10 +139,12 @@ def _git_merge_base(branch1: Branch, branch2: Branch) -> Commit:
     """Find the most recent common ancestor of two branches
     https://stackoverflow.com/questions/1549146/git-find-the-most-recent-common-ancestor-of-two-branches
     """
+    assert branch1.isidentifier()
+    assert branch2.isidentifier()
     stdout, stderr = _run_git_command(["merge-base", branch1, branch2])
     assert stderr == ""
     assert len(stdout) == 40
-    assert not " " in stdout
+    assert stdout.isidentifier()
     assert re.match(r"[0-9a-f]{40}", stdout)
     return Commit(stdout)
 
@@ -149,19 +153,22 @@ def _git_rev_parse(branch: Branch) -> Commit:
     """Get current commit hash
     https://stackoverflow.com/questions/15798862/what-does-git-rev-parse-do
     """
+    assert branch.isidentifier()
     stdout, stderr = _run_git_command(["rev-parse", branch])
     assert stderr == ""
     assert len(stdout) == 40
-    assert not " " in stdout
+    assert stdout.isidentifier()
     assert re.match(r"[0-9a-f]{40}", stdout)
     return Commit(stdout)
 
 
-def _git_branch_merged( branch1: Branch, branch2: Branch) -> bool:
+def _git_branch_merged(branch1: Branch, branch2: Branch) -> bool:
     """Check if branch 1 is merged into branch 2 (so branch 2 = branch 1 + some commits)
     To merge branch 1 into branch 2, we will need later `git merge branch1` when on branch 2
     https://stackoverflow.com/questions/226976/how-can-i-know-if-a-branch-has-been-already-merged-into-master
     """
+    assert branch1.isidentifier()
+    assert branch2.isidentifier()
     merge_base = _git_merge_base(branch1, branch2)
     rev1 = _git_rev_parse(branch1)
     rev2 = _git_rev_parse(branch2)
@@ -173,6 +180,8 @@ def _git_branch_merged( branch1: Branch, branch2: Branch) -> bool:
     return rev1 == merge_base
 
 def git_merge_branch_into(branch1: Branch, branch2: Branch) -> bool:
+    assert branch1.isidentifier()
+    assert branch2.isidentifier()
     if _git_branch_merged(branch1, branch2):
         return False
     git_checkout(branch2)

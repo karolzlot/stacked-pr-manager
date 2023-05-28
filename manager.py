@@ -74,7 +74,7 @@ def gh_get_pr_title(pr_number: int) -> str:
 
 def _run_git_command(args: list[str]) -> tuple[str, str]:
     all_args: list[str] = ["git", "-C", LOCAL_REPO_PATH] + args
-    result = subprocess.run(all_args, capture_output=True, text=True, check=True)
+    result = subprocess.run(all_args, capture_output=True, text=True)
     logger.trace(' '.join(all_args))
     logger.trace("-stdout: "+result.stdout.strip())
     if result.stderr:

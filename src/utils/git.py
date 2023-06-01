@@ -1,88 +1,12 @@
-import os, sys
 import re
-import time
 import subprocess
 from pathlib import Path
-from typing import Union, NewType, TypedDict
-from ruamel.yaml import YAML
-from dotenv import load_dotenv
-from github import Github
+
+
 from dirhash import dirhash
-from loguru import logger
-from time import sleep
-
-
-logger_format_stderr = (
-    "<green>{time:HH:mm:ss}</green> "
-    "<level>{level: <8}</level>| "
-    "{message}"
-)
-logger_format_file = (
-    "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
-    "<level>{level: <8}</level> | "
-    "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | "
-    "<level>{message}</level>"
-)
-logger.remove()
-logger.add(sys.stderr, format=logger_format_stderr, level="DEBUG")
-logger.add("logs/file_{time}.log", format=logger_format_file, level="TRACE")
-
-
-load_dotenv()
-
-GITHUB_ACCESS_TOKEN= os.getenv('GITHUB_ACCESS_TOKEN')
-LOCAL_REPO_PATH= os.getenv('LOCAL_REPO_PATH')
-GITHUB_REPO= os.getenv('GITHUB_REPO')
-assert GITHUB_ACCESS_TOKEN and LOCAL_REPO_PATH and GITHUB_REPO
-
-
-class Commit(str):
-    def __new__(cls, commit_hash):
-        if not cls._is_valid(commit_hash):
-            raise ValueError("Invalid Git commit hash")
-        
-        return super().__new__(cls, commit_hash)
-
-    @staticmethod
-    def _is_valid(commit_hash):
-        return bool(re.match("^[0-9a-f]{7,40}$", commit_hash))
-
-
-
-
-Branch = NewType('Branch', str)
-
-class PRData(TypedDict):
-    branch: Branch
-    title: str
-    pr_number: int
-    target: Branch
-
-
-def read_prs_config_file() -> list[PRData]:
-    file_path = Path('prs.yaml')
-    with open(file_path, 'r') as file:
-        yaml = YAML(typ='safe')
-        prs_data: list[dict] = yaml.load(file)
-
-    pull_requests_list = []
-    for entry in prs_data:
-        pull_request = PRData(
-            branch=entry['branch'],
-            title=entry['title'],
-            pr_number=entry['pr_number'],
-            target=entry['target']
-        )
-        pull_requests_list.append(pull_request)
-
-    return pull_requests_list
-
-
-def gh_get_pr_title(pr_number: int) -> str:
-    g = Github(GITHUB_ACCESS_TOKEN)
-    repo = g.get_repo(GITHUB_REPO)
-    pr = repo.get_pull(pr_number)
-    return pr.title
+from src.config.logger import logger
+from src.config.env_vars import LOCAL_REPO_PATH
+from src.models.types import Branch, PRData, Commit
 
 
 def _run_git_command(args: list[str]) -> tuple[str, str]:
@@ -207,7 +131,7 @@ def git_merge_branch_into(branch1: Branch, branch2: Branch) -> bool:
         return True
     else:
         raise ValueError(f"Unexpected output from git merge: {stdout}")
-
+    
 def sync_stacked_branches(prs: list[PRData] ) -> None:
     """Sync stacked branches in the order they are given
     """
@@ -242,8 +166,3 @@ def push_branches(prs: list[PRData]) -> None:
     """
     for pr in prs:
         git_push(pr["branch"])
-
-if __name__ == '__main__':
-
-    pass
-

@@ -1,5 +1,5 @@
 import re
-from typing import NewType, TypedDict
+from typing import NewType, Optional, TypedDict
 
 
 
@@ -19,7 +19,14 @@ class Commit(str):
 Branch = NewType('Branch', str)
 
 class PRData(TypedDict):
+    """deprecated"""
     branch: Branch
     title: str
     pr_number: int
     target: Branch
+
+class PullRequestBlueprint(TypedDict):
+    branch: Branch
+    target: Branch
+    title: Optional[str]
+

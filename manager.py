@@ -36,8 +36,21 @@ GITHUB_REPO= os.getenv('GITHUB_REPO')
 assert GITHUB_ACCESS_TOKEN and LOCAL_REPO_PATH and GITHUB_REPO
 
 
+class Commit(str):
+    def __new__(cls, commit_hash):
+        if not cls._is_valid(commit_hash):
+            raise ValueError("Invalid Git commit hash")
+        
+        return super().__new__(cls, commit_hash)
+
+    @staticmethod
+    def _is_valid(commit_hash):
+        return bool(re.match("^[0-9a-f]{7,40}$", commit_hash))
+
+
+
+
 Branch = NewType('Branch', str)
-Commit = NewType('Commit', str)
 
 class PRData(TypedDict):
     branch: Branch

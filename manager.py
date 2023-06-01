@@ -237,6 +237,12 @@ def dirhash_repo() -> str:
     return dir_hash
 
 
+def push_branches(prs: list[PRData]) -> None:
+    """Pull all branches
+    """
+    for pr in prs:
+        git_push(pr["branch"])
+
 if __name__ == '__main__':
 
     pass

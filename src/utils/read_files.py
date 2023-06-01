@@ -1,4 +1,4 @@
-from src.models.types import PRData
+from src.models.types import PRData, Branch
 from pathlib import Path
 from ruamel.yaml import YAML
 
@@ -22,4 +22,19 @@ def read_prs_config_file() -> list[PRData]:
 
     return pull_requests_list
 
+
+def load_branches_from_file(file: Path) -> list[Branch]:
+    """Load branches list from file (1 branch per line)."""
+
+    with open(file, "r") as f:
+        lines = f.readlines()
+
+    branches = []
+    for line in lines:
+        branches.append(Branch(line.strip()))
+
+    return branches
+
+
+        
 

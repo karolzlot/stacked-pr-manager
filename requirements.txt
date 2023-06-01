@@ -5,4 +5,4 @@ ruamel.yaml
 loguru
 click
 questionary
-pydantic
+pydantic<2

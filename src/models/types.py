@@ -1,6 +1,6 @@
 import re
-from typing import NewType, Optional, TypedDict
-
+from typing import NewType, TypedDict
+from pydantic import BaseModel
 
 
 class Commit(str):
@@ -25,8 +25,14 @@ class PRData(TypedDict):
     pr_number: int
     target: Branch
 
-class PullRequestBlueprint(TypedDict):
-    branch: Branch
-    target: Branch
-    title: Optional[str]
 
+class PullRequestBlueprint(BaseModel):
+    head: Branch # source
+    base: Branch # target
+    title: str
+
+
+
+if __name__ == '__main__':
+    
+    pass

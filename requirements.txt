@@ -3,3 +3,6 @@ PyGithub
 dirhash
 ruamel.yaml
 loguru
+click
+questionary
+pydantic

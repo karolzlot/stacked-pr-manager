@@ -1,7 +1,7 @@
 .venv/
 
 # Ignore everything
-*
+# *
 
 # But not these files
 !.gitignore
@@ -9,5 +9,13 @@
 !todo.md
 !requirements.txt
 
+.env
 
+*.yaml
+*.sh
+*.txt
 
+branches/
+logs/
+old/
+.vscode/

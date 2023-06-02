@@ -64,12 +64,14 @@ def create_gh_prs(pr_blueprints: list[PullRequestBlueprint]) -> list[int]:
         pr_number = create_gh_pr(pr_blueprint, silent=True)
         if pr_number:
             pr_numbers.append(pr_number)
+    logger.info(f"Created PRs: {pr_numbers}")
     return pr_numbers
 
 
 
 if  __name__ == '__main__':
 
+    pass
     # t1 = gh_get_pr_title(1)
     # print(t1)
     # print()

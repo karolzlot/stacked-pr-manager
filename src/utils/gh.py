@@ -1,6 +1,6 @@
 from github import Github
 from github.PullRequest import PullRequest
-from src.config.env_vars import GITHUB_ACCESS_TOKEN, GITHUB_REPO, BRANCH_PREFIX, GITHUB_USERNAME
+from src.config.env_vars import GITHUB_ACCESS_TOKEN, GITHUB_REPO, BRANCH_PREFIX, GITHUB_USERNAME, REVIEWERS
 from src.config.logger import logger
 from src.models.types import PullRequestBlueprint, PRChain
 import questionary as q
@@ -143,6 +143,33 @@ def change_pr_title(pr: PullRequest, new_title: str) -> None:
 
     pr.edit(title=new_title)
     logger.info(f"Changed PR #{pr_number} title to: {new_title}")
+
+
+def ask_for_review(pr: PullRequest):
+    """Ask REVIEWERS to review a PR if they are not under review already."""
+    # TODO: remove DRAFT status
+    pr_number = pr.number
+
+    # aaa =list(pr.get_reviews())
+    # # change draft to non-draft:
+    # if pr.draft:
+    #     pr.edit(draft=False)
+    #     print()
+
+    if pr.draft:
+        raise Exception(f"PR {pr_number} is draft")
+
+    if pr.requested_reviewers or pr.get_reviews().totalCount > 0:
+        logger.info(f"PR #{pr_number}: already asked for review.")
+        return None
+
+    logger.info(f"Asking {REVIEWERS} to review PR #{pr_number}")
+    if not q.confirm(f"Ask {REVIEWERS} to review PR #{pr_number} ({pr.title})?", default=False, auto_enter=True).ask():
+        logger.info("Aborting")
+        return None
+
+    pr.create_review_request(reviewers=REVIEWERS)
+    logger.info(f"Asked {REVIEWERS} to review PR #{pr_number}")
 
 
 if  __name__ == '__main__':

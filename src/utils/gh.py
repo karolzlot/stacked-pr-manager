@@ -114,6 +114,13 @@ def select_pr_chain(chains: List[PRChain]) -> Optional[PRChain]:
     return chains[options.index(selection)] if selection else None
 
 
+def select_pr_chain_from_user_opened_prs() -> Optional[PRChain]:
+    """Prompt the user to select a chain of PRs from user's opened PRs."""
+    prs = get_user_opened_prs()
+    chains = get_pr_chains(prs)
+    return select_pr_chain(chains)
+
+
 
 if  __name__ == '__main__':
 

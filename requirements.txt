@@ -6,3 +6,4 @@ loguru
 click
 questionary
 pydantic<2
+tabulate

@@ -108,7 +108,17 @@ def select_pr_chain(chains: List[PRChain]) -> Optional[PRChain]:
         print("No chains to select.")
         return None
 
-    options = [" -> ".join([pr.title for pr in chain]) for chain in chains]
+    # options should look like this:
+    # "branch1 <- 653,432,542,435,534 <- branch2"
+    # in a way so first_pr.base == branch1 and last_pr.head == branch2
+    # and also numbers are pr numbers
+
+    options = []
+    for chain in chains:
+        first_pr = chain[0]
+        last_pr = chain[-1]
+        options.append(f"{first_pr.base.label.split(':')[1]} <- " + ",".join([str(pr.number) for pr in chain]) + f" <- {last_pr.head.label.split(':')[1]}")
+
     selection = q.select("Choose a chain:", choices=options).ask()
 
     return chains[options.index(selection)] if selection else None
@@ -117,8 +127,8 @@ def select_pr_chain(chains: List[PRChain]) -> Optional[PRChain]:
 def select_pr_chain_from_user_opened_prs() -> Optional[PRChain]:
     """Prompt the user to select a chain of PRs from user's opened PRs."""
     prs = get_user_opened_prs()
-    chains = get_pr_chains(prs)
-    return select_pr_chain(chains)
+    selected_chain = get_pr_chains(prs)
+    return select_pr_chain(selected_chain)
 
 
 

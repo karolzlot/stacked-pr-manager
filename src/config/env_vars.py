@@ -12,6 +12,7 @@ def get_env(name: str) -> str:
 GITHUB_ACCESS_TOKEN = get_env('GITHUB_ACCESS_TOKEN')
 LOCAL_REPO_PATH = get_env('LOCAL_REPO_PATH')
 GITHUB_REPO = get_env('GITHUB_REPO')
+GITHUB_USERNAME = get_env('GITHUB_USERNAME')
 
 REVIEWERS= get_env('REVIEWERS').split(',')
 BRANCH_PREFIX= get_env('BRANCH_PREFIX')

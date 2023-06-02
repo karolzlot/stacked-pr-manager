@@ -1,6 +1,8 @@
 import re
 from typing import NewType, TypedDict
 from pydantic import BaseModel
+from typing import List
+from github.PullRequest import PullRequest
 
 
 class Commit(str):
@@ -32,7 +34,11 @@ class PullRequestBlueprint(BaseModel):
     title: str
 
 
+class PRChain(List[PullRequest]):
+    pass
+
+
 
 if __name__ == '__main__':
-    
+
     pass

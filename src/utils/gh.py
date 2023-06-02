@@ -120,7 +120,7 @@ def select_pr_chain(chains: List[PRChain]) -> Optional[PRChain]:
         options.append(f"{first_pr.base.label.split(':')[1]} <- " + ",".join([str(pr.number) for pr in chain]) + f" <- {last_pr.head.label.split(':')[1]}")
 
     selection = q.select("Choose a chain:", choices=options).ask()
-
+    logger.info(f"Selected chain: {selection}")
     return chains[options.index(selection)] if selection else None
 
 
@@ -130,6 +130,19 @@ def select_pr_chain_from_user_opened_prs() -> Optional[PRChain]:
     selected_chain = get_pr_chains(prs)
     return select_pr_chain(selected_chain)
 
+
+def change_pr_title(pr: PullRequest, new_title: str) -> None:
+    """Change the title of a PR."""
+    pr_number = pr.number
+
+    old_title = pr.title
+    logger.info(f"Changing PR #{pr_number} title \nfrom: \n{old_title} \nto: \n{new_title}")
+    if not q.confirm(f"Change PR #{pr_number} title to: {new_title}?", default=False, auto_enter=True).ask():
+        logger.info("Aborting")
+        return None
+
+    pr.edit(title=new_title)
+    logger.info(f"Changed PR #{pr_number} title to: {new_title}")
 
 
 if  __name__ == '__main__':

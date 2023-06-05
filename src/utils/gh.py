@@ -134,12 +134,18 @@ def select_pr_chain_from_user_opened_prs() -> Optional[PRChain]:
 def change_pr_title(pr: PullRequest, new_title: str) -> None:
     """Change the title of a PR."""
     pr_number = pr.number
-
     old_title = pr.title
+    
+    if old_title == new_title:
+        logger.info(f"PR #{pr_number} has already wanted title. Skipping.")
+        return None
+    
     logger.info(f"Changing PR #{pr_number} title \nfrom: \n{old_title} \nto: \n{new_title}")
     if not q.confirm(f"Change PR #{pr_number} title to: {new_title}?", default=False, auto_enter=True).ask():
         logger.info("Aborting")
         return None
+    
+    assert pr.title == old_title # make sure that the PR title is still the same to avoid race conditions, not sure if it retrieves it again though
 
     pr.edit(title=new_title)
     logger.info(f"Changed PR #{pr_number} title to: {new_title}")

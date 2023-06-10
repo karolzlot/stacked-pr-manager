@@ -10,7 +10,7 @@ def rename_prs_chain(template: str, prefix_length: int) -> None:
     for i, pr in enumerate(chain):
         branch_suffix_head = pr.head.label.split(":")[1][prefix_length:] 
         branch_suffix_base = pr.base.label.split(":")[1][prefix_length:] or "m"
-        new_pr_title = template.replace("$1", str(i+1)).replace("$2", f"{branch_suffix_head}->{branch_suffix_base}")
+        new_pr_title = template.replace("$1", str(i+1)).replace("$2", f"b{branch_suffix_base}<-b{branch_suffix_head}")
         
         change_pr_title(pr, new_pr_title)
         

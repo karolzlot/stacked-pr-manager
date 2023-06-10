@@ -16,9 +16,15 @@ class Commit(str):
     def _is_valid(commit_hash):
         return bool(re.match("^[0-9a-f]{7,40}$", commit_hash))
 
+class Branch(str):
+    pass
 
+class HeadBranch(Branch):
+    pass # source
 
-Branch = NewType('Branch', str)
+class BaseBranch(Branch):
+    pass # target
+
 
 class PRData(TypedDict):
     """deprecated"""

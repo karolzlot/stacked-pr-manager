@@ -10,7 +10,7 @@ def ask_for_review_pr_chain() -> None:
     for pr in chain:
         ask_for_review(pr)
     
-    logger.warning("Don't forget to remove DRAFT status from PRs.")
+    logger.warning("Don't forget to remove DRAFT status from PRs. (try selecting many PRs in GUI and then mark all at once as 'open')")
 
   
 

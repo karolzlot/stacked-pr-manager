@@ -274,6 +274,9 @@ def pr_is_ready_to_merge(pr: PullRequest, wait: bool = False) -> bool:
             f"PR #{pr_number} was created earlier than 30 days ago: {pr.created_at=}, this is a safety measure to avoid merging old PRs"
         )
 
+    if base(pr) != Branch("main"):
+        raise Exception(f"PR #{pr_number} is not based on 'main': {base(pr)=}")
+
     if not wait:
         if pr.mergeable_state != "clean":
             raise Exception(f"PR #{pr_number} is not clean: {pr.mergeable_state=}")

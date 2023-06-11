@@ -1,5 +1,5 @@
 from src.utils.gh import select_pr_chain_from_user_opened_prs, ask_for_review
-from loguru import logger
+from src.config.logger import logger
 
 def ask_for_review_pr_chain() -> None:
     chain = select_pr_chain_from_user_opened_prs()

@@ -1,7 +1,7 @@
 from src.models.types import PRData, Branch
 from pathlib import Path
 from ruamel.yaml import YAML
-from loguru import logger
+from src.config.logger import logger
 import questionary as q
 
 # def read_prs_config_file() -> list[PRData]:

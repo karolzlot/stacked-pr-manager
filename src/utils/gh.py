@@ -1,5 +1,4 @@
 from time import sleep
-from typing import List, Optional
 
 import questionary as q
 from github import Github
@@ -213,6 +212,10 @@ def ask_for_review(pr: PullRequest):
 
 if __name__ == "__main__":
     pass
+
+    # all_prs = get_user_opened_prs()
+    # chains = get_pr_chains(all_prs)
+
     # t1 = gh_get_pr_title(1)
     # print(t1)
     # print()

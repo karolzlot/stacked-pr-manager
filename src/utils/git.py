@@ -1,14 +1,12 @@
 import re
 import subprocess
 from pathlib import Path
-from time import sleep
 
 from dirhash import dirhash
 
 from src.config.env_vars import LOCAL_REPO_PATH
 from src.config.logger import logger
-from src.models.types import BaseBranch, Branch, Commit, HeadBranch, PRChain, PRData
-from src.utils.gh_utils import base, head
+from src.models.types import BaseBranch, Branch, Commit, HeadBranch
 
 
 def _run_git_command(args: list[str]) -> tuple[str, str]:
@@ -122,20 +120,6 @@ def git_merge_branch_into(base_branch: BaseBranch, head_branch: HeadBranch) -> b
         raise ValueError(f"Unexpected output from git merge: {stdout}")
 
 
-def prchain_merge_base_into_head(chain: PRChain) -> None:
-    """Sync stacked branches in the order they are given"""
-    for i in range(len(chain) - 1, -1, -1):
-        logger.trace(f"{i=}")
-        current_pr = chain[i]
-        if _git_branch_merged(base(current_pr), head(current_pr)):
-            continue
-        else:
-            for j in range(i, len(chain)):
-                logger.trace(f".{j=}")
-                current_pr = chain[j]
-                git_merge_branch_into(base(current_pr), head(current_pr))
-
-
 def dirhash_repo() -> str:
     ignore = [".git/", ".venv/", "local/", "__pycache__/"]
 
@@ -149,9 +133,3 @@ def dirhash_repo() -> str:
     dir_hash = dirhash(Path(LOCAL_REPO_PATH), algorithm="sha1", ignore=ignore)
     assert len(dir_hash) == 40
     return dir_hash
-
-
-def push_branches(prs: list[PRData]) -> None:
-    """Pull all branches"""
-    for pr in prs:
-        git_push(pr["branch"])

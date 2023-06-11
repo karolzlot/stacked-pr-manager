@@ -1,6 +1,6 @@
 from src.config.logger import logger
 from src.utils.gh import select_pr_chain_from_user_opened_prs
-from src.utils.git import prchain_merge_base_into_head
+from src.utils.pr_chain import merge_base_into_head
 
 
 def sync_prs_chain() -> None:
@@ -9,7 +9,7 @@ def sync_prs_chain() -> None:
         logger.info("Aborting, no chains found.")
         return
 
-    prchain_merge_base_into_head(chain)
+    merge_base_into_head(chain)
 
 
 if __name__ == "__main__":

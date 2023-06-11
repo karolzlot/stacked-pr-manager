@@ -59,14 +59,30 @@ def git_pull(branch: Branch) -> bool:
 
 def git_push(branch: Branch) -> bool:
     # TODO check if it is possible to push without checkout
+    # TODO check if it is possible to push (no not-pulled commits on remote etc.)
     assert branch != "main"
     git_checkout(branch)
     # if git_checkout(branch) > 0:
+    head_commit_local_before = _git_rev_parse(branch)
+    head_commit_origin_before = _git_rev_parse(Branch("origin/" + branch))
     stdout, stderr = _run_git_command(["push"])
     assert stdout == ""
     if stderr == f"Everything up-to-date":
+        assert head_commit_local_before == head_commit_origin_before
         return False
-    assert "remote: Resolving deltas:" in stderr
+
+    assert head_commit_local_before != head_commit_origin_before
+
+    head_commit_local_after = _git_rev_parse(branch)
+    head_commit_origin_after = _git_rev_parse(Branch("origin/" + branch))
+    assert (
+        head_commit_local_before == head_commit_local_after == head_commit_origin_after
+    )
+
+    assert (
+        f"{head_commit_origin_before[:9]}..{head_commit_origin_after[:9]}  {branch} -> {branch}"
+        in stderr
+    )
     assert git_checkout(branch) == 0
     logger.info(f"Pushed {branch}")
     return True

@@ -102,6 +102,7 @@ def _git_branch_merged(base_branch: BaseBranch, head_branch: HeadBranch) -> bool
         logger.debug(f"Branch {base_branch} is not merged into {head_branch}")
     return rev1 == merge_base
 
+
 def git_merge_branch_into(base_branch: BaseBranch, head_branch: HeadBranch) -> bool:
     if _git_branch_merged(base_branch, head_branch):
         return False
@@ -116,19 +117,19 @@ def git_merge_branch_into(base_branch: BaseBranch, head_branch: HeadBranch) -> b
     else:
         raise ValueError(f"Unexpected output from git merge: {stdout}")
     
-def sync_stacked_branches(prs: list[PRData] ) -> None:
+def sync_stacked_branches(chain: PRChain) -> None:
     """Sync stacked branches in the order they are given
     """
-
-    for i in range(len(prs)-1, -1, -1):
-        pr = prs[i]
-        print(i)
-        if _git_branch_merged(prs[i]["target"], prs[i]["branch"]):
+    for i in range(len(chain)-1, -1, -1):
+        logger.trace(f"{i=}")
+        current_pr = chain[i]
+        if _git_branch_merged(base(current_pr), head(current_pr)):
             continue
         else:
-            for j in range(i, len(prs)):
-                print(j)
-                git_merge_branch_into(prs[j]["target"], prs[j]["branch"])
+            for j in range(i, len(chain)):
+                logger.trace(f".{j=}")
+                current_pr = chain[j]
+                git_merge_branch_into(base(current_pr), head(current_pr))
 
 def dirhash_repo() -> str:
     ignore = [".git/", ".venv/", "local/", "__pycache__/"]

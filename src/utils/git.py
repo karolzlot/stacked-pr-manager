@@ -26,13 +26,13 @@ def git_checkout(branch: Branch) -> int:
     if stdout == f"Your branch is up to date with 'origin/{branch}'.":
         return 0
 
-    pattern = rf"Your branch is behind \'origin/{branch}\' by (\d+) commits, and can be fast-forwarded."
+    pattern = rf"Your branch is behind \'origin/{branch}\' by (\d+) commit(s)?, and can be fast-forwarded."
     match = re.search(pattern, stdout)
     if match:
         num_commits = int(match.group(1))
         return -num_commits
 
-    pattern = rf"Your branch is ahead of \'origin/{branch}\' by (\d+) commits."
+    pattern = rf"Your branch is ahead of \'origin/{branch}\' by (\d+) commit(s)?."
     match = re.search(pattern, stdout)
     if match:
         num_commits = int(match.group(1))

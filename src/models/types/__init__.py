@@ -13,8 +13,8 @@ class Commit(str):
         return super().__new__(cls, commit_hash)
 
     @staticmethod
-    def _is_valid(commit_hash):
-        return bool(re.match("^[0-9a-f]{7,40}$", commit_hash))
+    def _is_valid(commit_hash) -> bool:
+        return bool(re.match(r"^[0-9a-f]{40}$", commit_hash))
 
 
 

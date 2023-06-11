@@ -229,6 +229,22 @@ def ask_for_review(pr: PullRequest) -> None:
     logger.info(f"Asked {REVIEWERS} to review PR #{pr_number}")
 
 
+def is_approved(pr: PullRequest) -> bool:
+    """Check if a PR is approved."""
+    pr_number = pr.number
+    reviews = list(pr.get_reviews())
+    approved = False
+    for review in reviews:
+        if review.state == "APPROVED":
+            approved = True
+            break
+    if approved:
+        logger.trace(f"PR #{pr_number} is approved")
+    else:
+        logger.trace(f"PR #{pr_number} is not approved")
+    return approved
+
+
 if __name__ == "__main__":
     pass
 

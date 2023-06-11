@@ -122,7 +122,7 @@ def git_merge_branch_into(base_branch: BaseBranch, head_branch: HeadBranch) -> b
         raise ValueError(f"Unexpected output from git merge: {stdout}")
 
 
-def sync_stacked_branches(chain: PRChain) -> None:
+def prchain_merge_base_into_head(chain: PRChain) -> None:
     """Sync stacked branches in the order they are given"""
     for i in range(len(chain) - 1, -1, -1):
         logger.trace(f"{i=}")

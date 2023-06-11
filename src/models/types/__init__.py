@@ -1,5 +1,5 @@
 import re
-from typing import List, TypedDict
+from typing import TypedDict
 
 from github.PullRequest import PullRequest
 from pydantic import BaseModel
@@ -17,15 +17,6 @@ class Commit(str):
     @staticmethod
     def _is_valid(commit_hash) -> bool:
         return bool(re.match(r"^[0-9a-f]{40}$", commit_hash))
-
-
-class PRData(TypedDict):
-    """deprecated"""
-
-    branch: Branch
-    title: str
-    pr_number: int
-    target: Branch
 
 
 class PullRequestBlueprint(BaseModel):

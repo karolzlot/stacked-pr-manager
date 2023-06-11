@@ -4,6 +4,7 @@ from src.utils.pr_chain import merge_base_into_head
 
 
 def sync_prs_chain() -> None:
+    # TODO: rename this function
     chain = select_pr_chain_from_user_opened_prs()
     if not chain:
         logger.info("Aborting, no chains found.")

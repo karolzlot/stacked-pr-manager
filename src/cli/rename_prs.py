@@ -1,5 +1,5 @@
 from src.config.logger import logger
-from src.utils.gh import change_pr_title, select_pr_chain_from_user_opened_prs
+from src.utils.gh import base, change_pr_title, head, select_pr_chain_from_user_opened_prs
 
 
 def rename_prs_chain(template: str, prefix_length: int) -> None:
@@ -9,8 +9,8 @@ def rename_prs_chain(template: str, prefix_length: int) -> None:
         return
 
     for i, pr in enumerate(chain):
-        branch_suffix_head = pr.head.label.split(":")[1][prefix_length:]
-        branch_suffix_base = pr.base.label.split(":")[1][prefix_length:] or "m"
+        branch_suffix_head = head(pr)[prefix_length:]
+        branch_suffix_base = base(pr)[prefix_length:] or "m"
         new_pr_title = template.replace("$1", str(i + 1)).replace(
             "$2", f"b{branch_suffix_base}<-b{branch_suffix_head}"
         )

@@ -1,9 +1,9 @@
 import re
-from typing import NewType, TypedDict
+from typing import TypedDict
 from pydantic import BaseModel
 from typing import List
 from github.PullRequest import PullRequest
-
+from src.models.types.branch import *
 
 class Commit(str):
     def __new__(cls, commit_hash):
@@ -16,14 +16,6 @@ class Commit(str):
     def _is_valid(commit_hash):
         return bool(re.match("^[0-9a-f]{7,40}$", commit_hash))
 
-class Branch(str):
-    pass
-
-class HeadBranch(Branch):
-    pass # source
-
-class BaseBranch(Branch):
-    pass # target
 
 
 class PRData(TypedDict):

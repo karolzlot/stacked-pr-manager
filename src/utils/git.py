@@ -58,6 +58,39 @@ def git_pull(branch: Branch) -> bool:
         raise ValueError(f"Unexpected output from git pull: {stdout}")
 
 
+def git_pull_one_commit(branch: Branch, expected_commit_title: str) -> None:
+    """Adapted from https://stackoverflow.com/a/64033792/8896457"""
+    assert branch == Branch("main")  # currently only main is needed to be pulled
+    assert git_checkout(branch) == -1
+    stdout1, stderr1 = _run_git_command(["fetch"])
+    assert stdout1 == ""
+    assert stderr1 == ""
+
+    stdout2, stderr2 = _run_git_command(["rev-list", f"{branch}..origin/{branch}"])
+
+    assert stderr2 == ""
+    assert stdout2 != ""
+
+    local_commit = _git_rev_parse(branch)
+    origin_commit = Commit(stdout2)  # the commit that is not on the local branch
+
+    commit_title = get_commit_title(origin_commit)
+    assert commit_title == expected_commit_title
+
+    assert git_checkout(branch) == -1  # make sure that it's still true
+    stdout3, stderr3 = _run_git_command(["merge", origin_commit])
+
+    assert stderr3 == ""
+    assert f"Updating {local_commit[:9]}..{origin_commit[:9]}" in stdout3
+
+
+def get_commit_title(commit: Commit) -> str:
+    """Get first line of commit message"""
+    stdout, stderr = _run_git_command(["show", "-s", "--format=%B", commit])
+    assert stderr == ""
+    return stdout.split("\n")[0]
+
+
 def git_push(branch: Branch) -> bool:
     # TODO check if it is possible to push without checkout
     # TODO check if it is possible to push (no not-pulled commits on remote etc.)
@@ -151,3 +184,8 @@ def dirhash_repo() -> str:
     dir_hash = dirhash(Path(LOCAL_REPO_PATH), algorithm="sha1", ignore=ignore)
     assert len(dir_hash) == 40
     return dir_hash
+
+
+if __name__ == "__main__":
+
+    git_pull_one_commit(Branch("main"), "test")

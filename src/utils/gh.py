@@ -1,14 +1,21 @@
+from time import sleep
+from typing import List, Optional
+
+import questionary as q
 from github import Github
 from github.PullRequest import PullRequest
-from src.config.env_vars import GITHUB_ACCESS_TOKEN, GITHUB_REPO, BRANCH_PREFIX, GITHUB_USERNAME, REVIEWERS
-from src.config.logger import logger
-from src.models.types import PullRequestBlueprint, PRChain
-import questionary as q
 from questionary import Choice
 from tabulate import tabulate
-from time import sleep
-from typing import Optional, List
 
+from src.config.env_vars import (
+    BRANCH_PREFIX,
+    GITHUB_ACCESS_TOKEN,
+    GITHUB_REPO,
+    GITHUB_USERNAME,
+    REVIEWERS,
+)
+from src.config.logger import logger
+from src.models.types import PRChain, PullRequestBlueprint
 
 g = Github(GITHUB_ACCESS_TOKEN)
 repo = g.get_repo(GITHUB_REPO)
@@ -19,14 +26,20 @@ def gh_get_pr_title(pr_number: int) -> str:
     return pr.title
 
 
-def create_gh_pr(pr_blueprint: PullRequestBlueprint, silent:bool=False) -> Optional[int]:
-    
-    logger.info(f"Creating PR from {pr_blueprint.head} to {pr_blueprint.base} ({pr_blueprint.title})")
-        
-    if not silent and not q.confirm(f"Create this PR?", default=False, auto_enter=False).ask():
+def create_gh_pr(
+    pr_blueprint: PullRequestBlueprint, silent: bool = False
+) -> int | None:
+    logger.info(
+        f"Creating PR from {pr_blueprint.head} to {pr_blueprint.base} ({pr_blueprint.title})"
+    )
+
+    if (
+        not silent
+        and not q.confirm(f"Create this PR?", default=False, auto_enter=False).ask()
+    ):
         logger.info("Aborting")
         return None
-    
+
     # make sure that branches begin with user's prefix (except `main`):
     assert pr_blueprint.head.startswith(BRANCH_PREFIX)
     assert pr_blueprint.base.startswith(BRANCH_PREFIX) or pr_blueprint.base == "main"
@@ -34,7 +47,7 @@ def create_gh_pr(pr_blueprint: PullRequestBlueprint, silent:bool=False) -> Optio
     # make sure that the target branches exist:
     assert repo.get_branch(pr_blueprint.head)
     assert repo.get_branch(pr_blueprint.base)
-    
+
     sleep(3)
     pr = repo.create_pull(
         title=pr_blueprint.title,
@@ -43,7 +56,7 @@ def create_gh_pr(pr_blueprint: PullRequestBlueprint, silent:bool=False) -> Optio
         base=pr_blueprint.base,
         draft=True,
     )
-    
+
     logger.info(f"Created PR #{pr.number}: {pr.title}")
     sleep(3)
 
@@ -59,7 +72,9 @@ def create_gh_prs(pr_blueprints: list[PullRequestBlueprint]) -> list[int]:
         table.append([pr_blueprint.head, pr_blueprint.base, pr_blueprint.title])
     logger.info("Plan: \n" + tabulate(table, headers=["Source", "Target", "Title"]))
 
-    if not q.confirm(f"Create PRs according to above plan?", default=False, auto_enter=False).ask():
+    if not q.confirm(
+        f"Create PRs according to above plan?", default=False, auto_enter=False
+    ).ask():
         logger.info("Aborting")
         return []
 
@@ -81,7 +96,7 @@ def get_user_opened_prs() -> list[PullRequest]:
     return user_prs
 
 
-def get_pr_chains(prs: List[PullRequest]) -> List[PRChain]:
+def get_pr_chains(prs: list[PullRequest]) -> list[PRChain]:
     """Find chains of PRs."""
     pr_dict = {pr.base.label: [] for pr in prs}
     for pr in prs:
@@ -93,17 +108,20 @@ def get_pr_chains(prs: List[PullRequest]) -> List[PRChain]:
             for next_pr in pr_dict[pr.head.label]:
                 dfs(next_pr, PRChain(chain.copy()), chains_dict)
         else:
-            if len(chain) > 1 and (pr.head.label not in chains_dict or len(chain) > len(chains_dict[pr.head.label])):
+            if len(chain) > 1 and (
+                pr.head.label not in chains_dict
+                or len(chain) > len(chains_dict[pr.head.label])
+            ):
                 chains_dict[pr.head.label] = chain
 
     chains_dict = {}
     for pr in prs:
         dfs(pr, PRChain([]), chains_dict)
-    
+
     return list(chains_dict.values())
 
 
-def select_pr_chain(chains: List[PRChain]) -> Optional[PRChain]:
+def select_pr_chain(chains: list[PRChain]) -> PRChain | None:
     """Prompt the user to select a chain of PRs."""
     if not chains:
         print("No chains to select.")
@@ -118,14 +136,18 @@ def select_pr_chain(chains: List[PRChain]) -> Optional[PRChain]:
     for chain in chains:
         first_pr = chain[0]
         last_pr = chain[-1]
-        options.append(f"{first_pr.base.label.split(':')[1]} <- " + ",".join([str(pr.number) for pr in chain]) + f" <- {last_pr.head.label.split(':')[1]}")
+        options.append(
+            f"{first_pr.base.label.split(':')[1]} <- "
+            + ",".join([str(pr.number) for pr in chain])
+            + f" <- {last_pr.head.label.split(':')[1]}"
+        )
 
     selection = q.select("Choose a chain:", choices=options).ask()
     logger.info(f"Selected chain: {selection}")
     return chains[options.index(selection)] if selection else None
 
 
-def select_pr_chain_from_user_opened_prs() -> Optional[PRChain]:
+def select_pr_chain_from_user_opened_prs() -> PRChain | None:
     """Prompt the user to select a chain of PRs from user's opened PRs."""
     prs = get_user_opened_prs()
     selected_chain = get_pr_chains(prs)
@@ -136,17 +158,23 @@ def change_pr_title(pr: PullRequest, new_title: str) -> None:
     """Change the title of a PR."""
     pr_number = pr.number
     old_title = pr.title
-    
+
     if old_title == new_title:
         logger.info(f"PR #{pr_number} has already wanted title. Skipping.")
         return None
-    
-    logger.info(f"Changing PR #{pr_number} title \nfrom: \n{old_title} \nto: \n{new_title}")
-    if not q.confirm(f"Change PR #{pr_number} title to: {new_title}?", default=False, auto_enter=True).ask():
+
+    logger.info(
+        f"Changing PR #{pr_number} title \nfrom: \n{old_title} \nto: \n{new_title}"
+    )
+    if not q.confirm(
+        f"Change PR #{pr_number} title to: {new_title}?", default=False, auto_enter=True
+    ).ask():
         logger.info("Aborting")
         return None
-    
-    assert pr.title == old_title # make sure that the PR title is still the same to avoid race conditions, not sure if it retrieves it again though
+
+    assert (
+        pr.title == old_title
+    )  # make sure that the PR title is still the same to avoid race conditions, not sure if it retrieves it again though
 
     pr.edit(title=new_title)
     logger.info(f"Changed PR #{pr_number} title to: {new_title}")
@@ -171,7 +199,11 @@ def ask_for_review(pr: PullRequest):
         return None
 
     logger.info(f"Asking {REVIEWERS} to review PR #{pr_number}")
-    if not q.confirm(f"Ask {REVIEWERS} to review PR #{pr_number} ({pr.title})?", default=False, auto_enter=True).ask():
+    if not q.confirm(
+        f"Ask {REVIEWERS} to review PR #{pr_number} ({pr.title})?",
+        default=False,
+        auto_enter=True,
+    ).ask():
         logger.info("Aborting")
         return None
 
@@ -179,8 +211,7 @@ def ask_for_review(pr: PullRequest):
     logger.info(f"Asked {REVIEWERS} to review PR #{pr_number}")
 
 
-if  __name__ == '__main__':
-
+if __name__ == "__main__":
     pass
     # t1 = gh_get_pr_title(1)
     # print(t1)

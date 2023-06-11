@@ -1,8 +1,10 @@
-from src.models.types import PRData, Branch
 from pathlib import Path
-from ruamel.yaml import YAML
-from src.config.logger import logger
+
 import questionary as q
+from ruamel.yaml import YAML
+
+from src.config.logger import logger
+from src.models.types import Branch, PRData
 
 # def read_prs_config_file() -> list[PRData]:
 #     file_path = Path('prs.yaml')
@@ -26,7 +28,7 @@ import questionary as q
 def load_branches_from_file(file: Path) -> list[Branch]:
     """Load branches list from file (1 branch per line)."""
 
-    with open(file, "r") as f:
+    with open(file) as f:
         lines = f.readlines()
 
     branches = []
@@ -51,5 +53,3 @@ def find_branches_file() -> Path:
         file_name = q.select("Select file with branches:", choices=options).ask()
         logger.info(f"Using {file_name}")
         return BRANCHES_DIR / file_name
-
-

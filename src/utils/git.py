@@ -4,41 +4,44 @@ from pathlib import Path
 from time import sleep
 
 from dirhash import dirhash
-from src.config.logger import logger
+
 from src.config.env_vars import LOCAL_REPO_PATH
-from src.models.types import Branch, PRChain, PRData, Commit, BaseBranch, HeadBranch
-from src.utils.gh_utils import head, base
+from src.config.logger import logger
+from src.models.types import BaseBranch, Branch, Commit, HeadBranch, PRChain, PRData
+from src.utils.gh_utils import base, head
+
 
 def _run_git_command(args: list[str]) -> tuple[str, str]:
     all_args: list[str] = ["git", "-C", LOCAL_REPO_PATH] + args
     result = subprocess.run(all_args, capture_output=True, text=True)
-    logger.trace(' '.join(all_args))
-    logger.trace("-stdout: "+result.stdout.strip())
+    logger.trace(" ".join(all_args))
+    logger.trace("-stdout: " + result.stdout.strip())
     if result.stderr:
-        logger.trace("#stderr: "+result.stderr.strip())
+        logger.trace("#stderr: " + result.stderr.strip())
     assert result.returncode == 0
     return result.stdout.strip(), result.stderr.strip()
-    
+
+
 def git_checkout(branch: Branch) -> int:
     stdout, stderr = _run_git_command(["checkout", branch])
-    assert stderr in [f"Already on '{branch}'",
-            f"Switched to branch '{branch}'"]
+    assert stderr in [f"Already on '{branch}'", f"Switched to branch '{branch}'"]
     if stdout == f"Your branch is up to date with 'origin/{branch}'.":
         return 0
-    
-    pattern = rf'Your branch is behind \'origin/{branch}\' by (\d+) commits, and can be fast-forwarded.'
+
+    pattern = rf"Your branch is behind \'origin/{branch}\' by (\d+) commits, and can be fast-forwarded."
     match = re.search(pattern, stdout)
     if match:
         num_commits = int(match.group(1))
         return -num_commits
-        
-    pattern = rf'Your branch is ahead of \'origin/{branch}\' by (\d+) commits.'
+
+    pattern = rf"Your branch is ahead of \'origin/{branch}\' by (\d+) commits."
     match = re.search(pattern, stdout)
     if match:
         num_commits = int(match.group(1))
         return num_commits
 
     raise ValueError(f"Unexpected output from git checkout: {stdout}")
+
 
 def git_pull(branch: Branch) -> bool:
     # TODO check if it is possible to pull without checkout
@@ -54,6 +57,7 @@ def git_pull(branch: Branch) -> bool:
         return True
     else:
         raise ValueError(f"Unexpected output from git pull: {stdout}")
+
 
 def git_push(branch: Branch) -> bool:
     # TODO check if it is possible to push without checkout
@@ -112,15 +116,15 @@ def git_merge_branch_into(base_branch: BaseBranch, head_branch: HeadBranch) -> b
     if stdout == f"Already up to date.":
         return False
     elif "Merge made by the 'ort' strategy." in stdout:
-        logger.info(f"Branch {base_branch} merged into {head_branch}") 
+        logger.info(f"Branch {base_branch} merged into {head_branch}")
         return True
     else:
         raise ValueError(f"Unexpected output from git merge: {stdout}")
-    
+
+
 def sync_stacked_branches(chain: PRChain) -> None:
-    """Sync stacked branches in the order they are given
-    """
-    for i in range(len(chain)-1, -1, -1):
+    """Sync stacked branches in the order they are given"""
+    for i in range(len(chain) - 1, -1, -1):
         logger.trace(f"{i=}")
         current_pr = chain[i]
         if _git_branch_merged(base(current_pr), head(current_pr)):
@@ -130,6 +134,7 @@ def sync_stacked_branches(chain: PRChain) -> None:
                 logger.trace(f".{j=}")
                 current_pr = chain[j]
                 git_merge_branch_into(base(current_pr), head(current_pr))
+
 
 def dirhash_repo() -> str:
     ignore = [".git/", ".venv/", "local/", "__pycache__/"]
@@ -147,7 +152,6 @@ def dirhash_repo() -> str:
 
 
 def push_branches(prs: list[PRData]) -> None:
-    """Pull all branches
-    """
+    """Pull all branches"""
     for pr in prs:
         git_push(pr["branch"])

@@ -1,5 +1,6 @@
 import re
 
+
 class Branch(str):
     """Branch is a subclass of str that represents a Git branch name."""
 
@@ -12,31 +13,56 @@ class Branch(str):
 
     @staticmethod
     def is_valid(name) -> bool:
-        """Return True -> bool if name is a valid Git branch name, False otherwise.
-        """
+        """Return True -> bool if name is a valid Git branch name, False otherwise."""
         min_len = 4
         max_len = 30
-        if len(name) < min_len or len(name) > max_len:  # Ensure length is within acceptable bounds
+
+        # Ensure length is within acceptable bounds
+        if len(name) < min_len or len(name) > max_len:
             return False
-        if re.match(r'^[\w\-/\.]+$', name) is None:  # Check if there is a special character
+
+        # Check if there is a special character
+        if re.match(r"^[\w\-/\.]+$", name) is None:
             return False
-        if name.startswith("/") or name.endswith("/"):  # Can't start or end with a slash
+
+        # Can't start or end with a slash
+        if name.startswith("/") or name.endswith("/"):
             return False
-        if "//" in name:  # No consecutive slashes
+
+        # No consecutive slashes
+        if "//" in name:
             return False
-        if "~" in name or "^" in name or ":" in name or " " in name or "?" in name or "[" in name or "*" in name or "\\" in name:  # No special characters
+
+        # No special characters
+        if (
+            "~" in name
+            or "^" in name
+            or ":" in name
+            or " " in name
+            or "?" in name
+            or "[" in name
+            or "*" in name
+            or "\\" in name
+        ):
             return False
-        if "@{" in name or ".." in name:  # No @{ or ..
+
+        # No @{ or ..
+        if "@{" in name or ".." in name:
             return False
-        if "." in name:  # No dot
+
+        # No dot
+        if "." in name:
             return False
         return True
 
 
 class HeadBranch(Branch):
     """Head branch == source branch of a PR."""
+
     pass
+
 
 class BaseBranch(Branch):
     """Base branch == target branch of a PR."""
+
     pass

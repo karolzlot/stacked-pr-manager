@@ -245,6 +245,62 @@ def is_approved(pr: PullRequest) -> bool:
     return approved
 
 
+def pr_is_ready_to_merge(pr: PullRequest, wait: bool = False) -> bool:
+    """Check if a PR is ready to merge."""
+    pr.update()
+
+    pr_number = pr.number
+
+    if pr.merged:
+        raise Exception(f"PR #{pr_number} is already merged")
+
+    if not is_approved(pr):
+        raise Exception(f"PR #{pr_number} is not approved")
+
+    if not pr.mergeable:
+        raise Exception(f"PR #{pr_number} is not mergeable")
+
+    if pr.draft:
+        raise Exception(f"PR #{pr_number} is 'draft'")
+
+    if not pr.rebaseable:
+        raise Exception(f"PR #{pr_number} is not rebaseable")
+
+    if pr.state != "open":
+        raise Exception(f"PR #{pr_number} is not open: {pr.state=}")
+
+    if pr.created_at < (datetime.datetime.now() - datetime.timedelta(days=30)):
+        raise Exception(
+            f"PR #{pr_number} was created earlier than 30 days ago: {pr.created_at=}, this is a safety measure to avoid merging old PRs"
+        )
+
+    if not wait:
+        if pr.mergeable_state != "clean":
+            raise Exception(f"PR #{pr_number} is not clean: {pr.mergeable_state=}")
+        else:
+            logger.trace(f"PR #{pr_number} is ready to merge")
+            return True
+    else:
+        return pr.mergeable_state == "clean"
+
+
+def wait_pr_ready_to_merge(pr: PullRequest) -> None:
+    """Wait until a PR is ready to merge."""
+    pr_number = pr.number
+    while True:
+        if not pr_is_ready_to_merge(pr, wait=True):
+            raise Exception(f"PR #{pr_number} is not ready to merge")
+        else:
+            if pr.mergeable_state == "clean":
+                break
+            else:
+                logger.info(
+                    f"PR #{pr_number} is not ready to merge: {pr.mergeable_state=}. Waiting for it..."
+                )
+                sleep(10)
+    logger.info(f"PR #{pr_number} is ready to merge")
+
+
 if __name__ == "__main__":
     pass
 

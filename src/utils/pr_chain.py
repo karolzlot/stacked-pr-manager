@@ -18,7 +18,7 @@ def merge_base_into_head(chain: PRChain) -> None:
                 git_merge_branch_into(base(current_pr), head(current_pr))
 
 
-def push_branches(chain: PRChain) -> None:
+def push(chain: PRChain) -> None:
     """Push all head branches in PR chain"""
     for pr in chain:
         git_push(head(pr))

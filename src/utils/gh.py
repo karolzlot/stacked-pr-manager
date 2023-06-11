@@ -9,6 +9,7 @@ from tabulate import tabulate
 from time import sleep
 from typing import Optional, List
 
+
 g = Github(GITHUB_ACCESS_TOKEN)
 repo = g.get_repo(GITHUB_REPO)
 
@@ -73,7 +74,7 @@ def create_gh_prs(pr_blueprints: list[PullRequestBlueprint]) -> list[int]:
 def get_user_opened_prs() -> list[PullRequest]:
     """Find users's PRs."""
     prs = repo.get_pulls(state="open")
-    user_prs = []
+    user_prs: list[PullRequest] = []
     for pr in prs:
         if pr.user.login == GITHUB_USERNAME:
             user_prs.append(pr)

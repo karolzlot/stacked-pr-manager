@@ -1,6 +1,6 @@
 from src.config.logger import logger
 from src.models.types import PRChain
-from src.utils.gh_utils import base, head
+from src.utils.gh import base, head
 from src.utils.git import _git_branch_merged, git_merge_branch_into, git_push
 
 

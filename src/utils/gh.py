@@ -3,7 +3,6 @@ from time import sleep
 import questionary as q
 from github import Github
 from github.PullRequest import PullRequest
-from questionary import Choice
 from tabulate import tabulate
 
 from src.config.env_vars import (
@@ -14,10 +13,24 @@ from src.config.env_vars import (
     REVIEWERS,
 )
 from src.config.logger import logger
-from src.models.types import PRChain, PullRequestBlueprint
+from src.models.types import (
+    BaseBranch,
+    HeadBranch,
+    PRChain,
+    PullRequest,
+    PullRequestBlueprint,
+)
 
 g = Github(GITHUB_ACCESS_TOKEN)
 repo = g.get_repo(GITHUB_REPO)
+
+
+def head(pr: PullRequest) -> HeadBranch:
+    return HeadBranch(pr.head.label.split(":")[1])
+
+
+def base(pr: PullRequest) -> BaseBranch:
+    return BaseBranch(pr.base.label.split(":")[1])
 
 
 def gh_get_pr_title(pr_number: int) -> str:

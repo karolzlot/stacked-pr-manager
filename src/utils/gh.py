@@ -136,7 +136,7 @@ def get_pr_chains(prs: list[PullRequest]) -> list[PRChain]:
 def select_pr_chain(chains: list[PRChain]) -> PRChain:
     """Prompt the user to select a chain of PRs."""
     if not chains:
-        logger.critical("No chains found")
+        logger.error("No chains found")
         raise ValueError("No chains found")
 
     # options should look like this:
@@ -159,7 +159,7 @@ def select_pr_chain(chains: list[PRChain]) -> PRChain:
     chain = chains[options.index(selection)] if selection else None
 
     if not chain:
-        logger.critical("No chain selected")
+        logger.error("No chain selected")
         raise ValueError("No chain selected")
 
     return chain
@@ -198,7 +198,7 @@ def change_pr_title(pr: PullRequest, new_title: str) -> None:
     logger.info(f"Changed PR #{pr_number} title to: {new_title}")
 
 
-def ask_for_review(pr: PullRequest):
+def ask_for_review(pr: PullRequest) -> None:
     """Ask REVIEWERS to review a PR if they are not under review already."""
     # TODO: remove DRAFT status
     pr_number = pr.number

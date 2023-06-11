@@ -42,6 +42,7 @@ def git_checkout(branch: Branch) -> int:
 
 
 def git_pull(branch: Branch) -> bool:
+    assert branch == Branch("main")  # currently only main is needed to be pulled
     # TODO check if it is possible to pull without checkout
     git_checkout(branch)
     # if git_checkout(branch) < 0:
@@ -118,7 +119,7 @@ def _git_branch_merged(base_branch: BaseBranch, head_branch: HeadBranch) -> bool
     assert rev2 != merge_base
     assert rev2 != rev1
     if rev1 != merge_base:
-        logger.debug(f"Branch {base_branch} is not merged into {head_branch}")
+        logger.trace(f"Branch {base_branch} is not merged into {head_branch}")
     return rev1 == merge_base
 
 

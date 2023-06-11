@@ -68,6 +68,7 @@ def git_push(branch: Branch) -> bool:
         return False
     assert "remote: Resolving deltas:" in stderr
     assert git_checkout(branch) == 0
+    logger.info(f"Pushed {branch}")
     return True
 
 

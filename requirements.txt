@@ -7,3 +7,4 @@ click
 questionary
 pydantic<2
 tabulate
+pre-commit

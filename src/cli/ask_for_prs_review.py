@@ -4,9 +4,6 @@ from src.utils.gh import ask_for_review, select_pr_chain_from_user_opened_prs
 
 def ask_for_review_pr_chain() -> None:
     chain = select_pr_chain_from_user_opened_prs()
-    if not chain:
-        logger.info("Aborting, no chains found.")
-        return
 
     for pr in chain:
         ask_for_review(pr)

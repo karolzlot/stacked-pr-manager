@@ -133,11 +133,11 @@ def get_pr_chains(prs: list[PullRequest]) -> list[PRChain]:
     return list(chains_dict.values())
 
 
-def select_pr_chain(chains: list[PRChain]) -> PRChain | None:
+def select_pr_chain(chains: list[PRChain]) -> PRChain:
     """Prompt the user to select a chain of PRs."""
     if not chains:
-        print("No chains to select.")
-        return None
+        logger.critical("No chains found")
+        raise ValueError("No chains found")
 
     # options should look like this:
     # "branch1 <- 653,432,542,435,534 <- branch2"
@@ -156,10 +156,16 @@ def select_pr_chain(chains: list[PRChain]) -> PRChain | None:
 
     selection = q.select("Choose a chain:", choices=options).ask()
     logger.info(f"Selected chain: {selection}")
-    return chains[options.index(selection)] if selection else None
+    chain = chains[options.index(selection)] if selection else None
+
+    if not chain:
+        logger.critical("No chain selected")
+        raise ValueError("No chain selected")
+
+    return chain
 
 
-def select_pr_chain_from_user_opened_prs() -> PRChain | None:
+def select_pr_chain_from_user_opened_prs() -> PRChain:
     """Prompt the user to select a chain of PRs from user's opened PRs."""
     prs = get_user_opened_prs()
     selected_chain = get_pr_chains(prs)

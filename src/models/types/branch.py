@@ -18,7 +18,7 @@ class Branch(str):
         max_len = 30
         if len(name) < min_len or len(name) > max_len:  # Ensure length is within acceptable bounds
             return False
-        if re.match(r'^[\w\.-]+$', name) is None:  # Check if there is a special character
+        if re.match(r'^[\w\-/\.]+$', name) is None:  # Check if there is a special character
             return False
         if name.startswith("/") or name.endswith("/"):  # Can't start or end with a slash
             return False

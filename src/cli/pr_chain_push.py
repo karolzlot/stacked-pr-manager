@@ -10,5 +10,4 @@ def pr_chain_push() -> None:
 
 
 if __name__ == "__main__":
-
     pr_chain_push()

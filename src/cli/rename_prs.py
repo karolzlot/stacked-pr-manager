@@ -1,5 +1,10 @@
 from src.config.logger import logger
-from src.utils.gh import base, change_pr_title, head, select_pr_chain_from_user_opened_prs
+from src.utils.gh import (
+    base,
+    change_pr_title,
+    head,
+    select_pr_chain_from_user_opened_prs,
+)
 
 
 def rename_prs_chain(template: str, prefix_length: int) -> None:

@@ -10,5 +10,4 @@ def pr_chain_merge_base_into_head() -> None:
 
 
 if __name__ == "__main__":
-
     pr_chain_merge_base_into_head()

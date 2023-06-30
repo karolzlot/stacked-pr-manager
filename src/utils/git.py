@@ -187,5 +187,4 @@ def dirhash_repo() -> str:
 
 
 if __name__ == "__main__":
-
     git_pull_one_commit(Branch("main"), "test")

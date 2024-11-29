@@ -9,7 +9,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 python-dotenv = "^1.0.0"
-PyGithub = "^1.59.0"
+PyGithub = "^1.59.1"
 dirhash = "^0.2.1"
 "ruamel.yaml" = "^0.17.32"
 loguru = "^0.7.0"

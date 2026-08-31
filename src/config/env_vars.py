@@ -8,7 +8,7 @@ load_dotenv()
 def get_env(name: str) -> str:
     env = os.getenv(name)
     if not env:
-        raise EnvironmentError(f"Environment variable '{name}' is not set or empty")
+        raise OSError(f"Environment variable '{name}' is not set or empty")
     return env
 
 
